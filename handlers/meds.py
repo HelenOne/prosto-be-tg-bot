@@ -1,9 +1,14 @@
+import asyncio
+
 from aiogram import Router
 from aiogram.types import Message, CallbackQuery
 from datetime import datetime
 
 from keyboards.keyboards import meds_kb, main_kb
 from services.storage import load_data, save_data
+
+from aiogram import Bot
+from services.reminders import remind_later
 
 router = Router()
 
@@ -33,7 +38,16 @@ async def meds_callback(callback: CallbackQuery):
         text = "супер 💛"
 
     elif action == "meds_later":
-        text = "окей, напомню позже"
+        text = "окей, напомню через 20 минут 💛"
+
+        bot = callback.bot
+        user_id = callback.from_user.id
+
+        original_text = callback.message.text
+
+        asyncio.create_task(
+            remind_later(bot, user_id, original_text)
+        )
 
     else:
         data[user_id][today]["meds"] = False

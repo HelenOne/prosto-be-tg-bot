@@ -36,3 +36,14 @@ def get_users():
     # пока просто список
     # позже можно из data.json
     return ["YOUR_USER_ID"]
+
+async def remind_later(bot, user_id, text, delay=1200):
+    await asyncio.sleep(delay)
+
+    from keyboards.keyboards import meds_kb
+
+    await bot.send_message(
+        user_id,
+        f"напоминаю 💛\n\n{text}",
+        reply_markup=meds_kb
+    )
