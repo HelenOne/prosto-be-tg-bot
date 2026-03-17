@@ -9,6 +9,6 @@ router = Router()
 @router.message(CommandStart())
 async def start(message: Message):
     await message.answer(
-        "можно просто быть\n\nчто хочешь сейчас?",
+        "можно просто быть 💛\n\nчто хочешь сейчас?",
         reply_markup=main_kb
     )

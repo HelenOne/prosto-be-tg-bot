@@ -1,25 +1,45 @@
 from aiogram import Router
-from aiogram.types import Message
+from aiogram.types import Message, CallbackQuery
 from datetime import datetime
 
-from keyboards.keyboards import main_kb
+from keyboards.keyboards import meds_kb, main_kb
 from services.storage import load_data, save_data
 
 router = Router()
 
 @router.message(lambda m: m.text == "💊 таблетки")
 async def meds(message: Message):
-    await message.answer("ты приняла таблетки? напиши 'приняла'")
+    await message.answer(
+        "💊 пора таблетки\n\nты уже приняла?",
+        reply_markup=meds_kb
+    )
 
-@router.message(lambda m: "приняла" in m.text.lower())
-async def meds_done(message: Message):
+@router.callback_query(lambda c: c.data.startswith("meds_"))
+async def meds_callback(callback: CallbackQuery):
+    action = callback.data
+
     data = load_data()
     today = str(datetime.now().date())
+    user_id = str(callback.from_user.id)
 
-    if today not in data:
-        data[today] = {}
+    if user_id not in data:
+        data[user_id] = {}
 
-    data[today]["meds"] = True
+    if today not in data[user_id]:
+        data[user_id][today] = {}
+
+    if action == "meds_yes":
+        data[user_id][today]["meds"] = True
+        text = "супер 💛"
+
+    elif action == "meds_later":
+        text = "окей, напомню позже"
+
+    else:
+        data[user_id][today]["meds"] = False
+        text = "ничего страшного"
+
     save_data(data)
 
-    await message.answer("отлично", reply_markup=main_kb)
+    await callback.message.answer(text, reply_markup=main_kb)
+    await callback.answer()
